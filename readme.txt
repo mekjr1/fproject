@@ -1,7 +1,7 @@
-
+Required Libraries
 
 library(dygraphs) # interactive js plots library(xts) library(knitr) library(dplyr) library(ggplot2) library(wordcloud) library(RColorBrewer) library™ # for document term matrix library(e1071) # for naive bayes library(stringr)
-
+=========================
 #read the csv containing df. df<-read.csv(“nbasubredditfull.csv”)
 
 #read the sentiment lexico, a list of >6000 sentiment lexicon gathered from Liu #https://www.cs.uic.edu/~liub/FBS/sentiment-analysis.html sent_lexicon <- read.csv(“sent_lexicon.csv”)
