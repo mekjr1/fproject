@@ -10,11 +10,11 @@ library(e1071) # for naive bayes
 library(stringr)
  
 #read the csv containing df.
-df<-read.csv("nbasubredditfull.csv")
+df<-read.csv("csv/nbasubredditfull.csv")
 
 #read the sentiment lexico, a list of >6000 sentiment lexicon gathered from Liu
 #https://www.cs.uic.edu/~liub/FBS/sentiment-analysis.html
-sent_lexicon <- read.csv("sent_lexicon.csv")
+sent_lexicon <- read.csv("csv/sent_lexicon.csv")
 
 #convert the times to UTC standards
 df$created_timestamp <- as.POSIXct(df$created_utc, tz = "UTC", origin = "1970-01-01")
@@ -47,8 +47,8 @@ ggplot(supporter_counts, aes(x = users, y = comments)) +
   ggtitle("Active Fans") + 
   geom_abline(intercept = fit_coef[1], slope = fit_coef[2])
 
-
-
+library(xts)
+library(dplyr)
 #Reduce the author flair to only those equal to the names of the teams in the
 #finals in their respective conferences
 c_finals <- df %>%
@@ -65,6 +65,7 @@ y <- cbind("Atlanta Hawks" = xts(hw$comments, hw$created_date),
            "Cleveland Cavaliers" = xts(cav$comments, cav$created_date),
            "Golden State Warriors" = xts(war$comments, war$created_date),
            "Houston Rockets" = xts(roc$comments, roc$created_date))
+library(dygraphs)
 
 plot_ts <- function(y, ylabel, yrange){
   #using dygraph to make a time series and add the event descript to-
@@ -75,15 +76,15 @@ plot_ts <- function(y, ylabel, yrange){
     dySeries("Cleveland.Cavaliers") %>%
     dySeries("Golden.State.Warriors") %>%
     dySeries("Houston.Rockets") %>%
-    dyEvent("2015-05-19", "Rockets 106 - Warrior 110", labelLoc = "top") %>%
-    dyEvent("2015-05-20", "Cavaliers 97 - 89 Hawks ", labelLoc = "top") %>%
-    dyEvent("2015-05-21", "Rockets 98 - 99 Warriors", labelLoc = "top") %>%
-    dyEvent("2015-05-22", "Cavaliers 94 - 82 Hawks", labelLoc = "top") %>%
-    dyEvent("2015-05-23", "Warriors 115 - 80 Rockets", labelLoc = "top") %>%
-    dyEvent("2015-05-24", "Hawks 111 - 113 Cavaliers ", labelLoc = "top") %>%
-    dyEvent("2015-05-25", "Warriors 115 -128 Houston", labelLoc = "top") %>%
-    dyEvent("2015-05-26", "Hawks 88 - Cavaliers 118", labelLoc = "top") %>%
-    dyEvent("2015-05-27", "Rockets 90- 104 Warriors", labelLoc = "top") %>%
+    dyEvent("2015-05-20", "Rockets 106 - Warrior 110", labelLoc = "top") %>%
+    dyEvent("2015-05-21", "Cavaliers 97 - 89 Hawks ", labelLoc = "top") %>%
+    dyEvent("2015-05-22", "Rockets 98 - 99 Warriors", labelLoc = "top") %>%
+    dyEvent("2015-05-23", "Cavaliers 94 - 82 Hawks", labelLoc = "top") %>%
+    dyEvent("2015-05-24", "Warriors 115 - 80 Rockets", labelLoc = "top") %>%
+    dyEvent("2015-05-25", "Hawks 111 - 113 Cavaliers ", labelLoc = "top") %>%
+    dyEvent("2015-05-26", "Warriors 115 -128 Houston", labelLoc = "top") %>%
+    dyEvent("2015-05-27", "Hawks 88 - Cavaliers 118", labelLoc = "top") %>%
+    dyEvent("2015-05-28", "Rockets 90- 104 Warriors", labelLoc = "top") %>%
     dyAxis("y", label = ylabel, valueRange = yrange) %>%
     dyRangeSelector()
 }
@@ -174,13 +175,14 @@ get_sentiment = function(sentences, poses, negs, .progress='none')
   scores.df = data.frame(text=sentences, score=scores)
   return(scores.df)
 }
-
+library(plyr)
+library(stringr)
 #get the sentiment intensity on all the comments 
 sentiment = get_sentiment(post_match$body, sent_lexicon$positive, sent_lexicon$negative, .progress='text')
 
 #add to a new column in the post_match d.f
 post_match$sentiment<- sentiment$score
-junk$nm[junk$nm == "B"] <- "b"
+
 post_match$sentVal[post_match$sentiment<=-2]<-"Very Negative"
 post_match$sentVal[post_match$sentiment==-1]<-"Negative"
 post_match$sentVal[post_match$sentiment==0]<-"Neutral"
@@ -188,7 +190,7 @@ post_match$sentVal[post_match$sentiment>=2]<-"Very Positive"
 post_match$sentVal[post_match$sentiment==1]<-"Positive"
 
 
-
+library(ggplot2)
 # boxplot
 qplot(author_flair_text, sentiment,data=post_match,fill = author_flair_text,geom=c("boxplot", "jitter"),
       main="Sentiment by Team",
@@ -207,7 +209,9 @@ for (i in 1:emot_numb)
   tmp=  subset( post_match$body, post_match$sentVal == emotion_list[i])
   emotion.coments[i] = paste(tmp, collapse=" ")
 }
-
+library(wordcloud)
+library(RColorBrewer)
+library(tm) # for document term matrix
 # remove stopwords
 emotion.coments = removeWords(emotion.coments, stopwords("english"))
 # create corpus
