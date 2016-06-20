@@ -8,3 +8,5 @@ library(dygraphs) # interactive js plots library(xts) library(knitr) library(dpl
 
 Required input data can are all found in the same directory as the script, so it should be able to run with no hassle.
 
+Due to size limitation the nbasubredditfull.csv is stored here
+https://mega.nz/#!5JcigaiB!Z4_gG9MGsRm5sPBNpj1E4OcWc9tH7DzRaLXBT3KrpTg
